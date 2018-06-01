@@ -35,6 +35,7 @@ jayApp.controller('jayCtlr', function ($scope, $interval) {
     $scope.siteName = "Arockia Johnson";
     $scope.singleMenu = {};
     $scope.qtys = [];
+    $scope.carts = [];
     $scope.menuList = [{"name": "Alleppey Fish Curry", "price": 436}, {"name": "Aloo Dhanya Tikki", "price": 416}, {"name": "Butterfly Prawns", "price": 312}, {"name": "Catch of the day in Banana Leaves", "price": 412}, {"name": "Cock-a-leekie ", "price": 133}, {"name": "Corn Fritters", "price": 174}, {"name": "Dragon Soup", "price": 318}, {"name": "Fish ", "price": 348}, {"name": "Fish Cube Masala Fry", "price": 389}, {"name": "Fish Platter", "price": 156}, {"name": "French Fries", "price": 101}, {"name": "Gazpacho ", "price": 437}, {"name": "Grilled Fish Steak", "price": 296}, {"name": "Grilled Tiger Prawn", "price": 234}, {"name": "Kerala Fish Platter", "price": 261}, {"name": "Malabar Prawn Curry", "price": 348}, {"name": "Masala Fried Fish", "price": 182}, {"name": "Prawn and Mushroom Soup", "price": 220}, {"name": "Prawn Bisque ", "price": 142}, {"name": "Prawn Platter", "price": 16}, {"name": "Sea Food Ularthiyathu", "price": 17}, {"name": "Seafood Chowder", "price": 204}, {"name": "Seafood Platter", "price": 441}, {"name": "Seafood Platter with Lobster", "price": 375}, {"name": "Shrimp Cocktail", "price": 474}, {"name": "Spicy Prawn Skewers", "price": 228}, {"name": "Squid/ Prawn Tempura", "price": 493}, {"name": "Sweet Corn Chicken Soup", "price": 210}, {"name": "Tomato and Basil Soup ", "price": 350}, {"name": "Traditional Kerala specialities", "price": 343}, {"name": "Travancore Fish Roast", "price": 31}];
     $scope.validate = function () {
         var tmpSession = $scope.jayDb.findOne({email: $scope.user.email, password: sha1($scope.user.password)});
@@ -82,7 +83,9 @@ jayApp.controller('jayCtlr', function ($scope, $interval) {
             } else {
                 $scope.jayDb.db.jay_cart.add({item_id: id, quantity: qty});
             }
-            $scope.alert('Menu item added to cart!');
+            alert('Menu item added to cart!');
+            $scope.getAllCart();
+            $.mobile.navigate("#cart");
         });
     };
     /**
@@ -90,19 +93,34 @@ jayApp.controller('jayCtlr', function ($scope, $interval) {
      * @returns Promise
      */
     $scope.getAllCart = function () {
+        $('#cartBody').html('');
+        var grantTot = 0;
         $scope.jayDb.db.jay_cart.each(function (cart) {
-            console.log($scope.qtys);
-            $('#cartListView').append('<li>' + $scope.menuList[cart.item_id].name + '<span class="ui-li-count">' + cart.quantity + '</span></li>');
-            $('#cartListView').listview().listview('refresh');
+            $scope.carts.push(cart);
+            var tot = cart.quantity * $scope.menuList[cart.item_id].price;
+            grantTot = grantTot + tot;
+            $('#cartBody').append('<tr>' +
+                    ' <td>' + $scope.menuList[cart.item_id].name + '</td>' +
+                    ' <td>' + $scope.menuList[cart.item_id].price + '</td>' +
+                    ' <td>' + cart.quantity + '</td>' +
+                    ' <td>' + tot + '</td>' +
+                    ' <td style="text-align:center;">' +
+                    '<a data-id="' + cart.id + '" href="#" class="ui-btn ui-icon-delete ui-btn-icon-left ui-shadow ui-corner-all removeCart">Remove Item</a>' +
+                    '</td>' +
+                    '</tr>');
+            $('#cartTable').show();
+            $('#grantTot span.total').html(grantTot);
         });
+
         $scope.jayDb.db.jay_cart.count().then(function (isCnt) {
+            $('#cartListView').html('');
             if (isCnt === 0) {
                 $('#cartListView').append('<li>No Items in your shopping cart!');
+                $('#cartTable').hide();
+                $('#grantTot span.total').html('0');
             }
             $('#cartListView').listview().listview('refresh');
         });
-
-        $('#cartListView').listview().listview('refresh');
     };
     $scope.alert = function (msg) {
         $scope.alertMsg = msg;
@@ -124,6 +142,23 @@ jayApp.controller('jayCtlr', function ($scope, $interval) {
             $('#author-list ul').listview().listview('refresh').alphascroll();
             $('#cartListView').listview().listview('refresh');
         }, 3000);
+        $(document).on('pagechange', '#cart', function (event) {
+            $scope.getAllCart();
+        }).on('click', '.removeCart', function (e) {
+            if (confirm('Are you sure want to remove from cart?')) {
+                var curPK = $(this).data('id');
+                $scope.jayDb.db.jay_cart.where("id").equals(curPK).delete()
+                        .then(function (deleteCount) {
+                            $scope.getAllCart();
+                        });
+            }
+        });
+        setTimeout(function () {
+            var actPage = $.mobile.activePage.attr("id");
+            if (actPage === 'cart') {
+                $scope.getAllCart();
+            }
+        }, 500);
     };
     $scope.signUp = function () {
         $scope.register.password = sha1($scope.register.password);
@@ -132,9 +167,10 @@ jayApp.controller('jayCtlr', function ($scope, $interval) {
         $.mobile.navigate("#login");
     };
     $scope.logout = function () {
-        if (alert('Are you sure want to log out?')) {
+        if (confirm('Are you sure want to log out?')) {
             $scope.session = {};
             localStorage.clear();
+            console.log('HI');
             $.mobile.navigate("#login");
         }
     };
