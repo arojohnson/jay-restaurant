@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <link rel="stylesheet" type="text/css" href="js/jquery.mobile-1.4.5.min.css" />
+        <link rel="stylesheet" type="text/css" href="css/jquery.mobile.alphascroll.css" />
+        <link rel='stylesheet' type="text/css" href='css/johnson.css' />
+        <script src="js/jquery-1.12.2.min.js"></script>
+        <script src="js/jquery.mobile-1.4.5.min.js"></script>
+        <script src="js/jquery.mobile.alphascroll.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.5/angular.min.js"></script>
+        <script type="text/javascript" src="js/sha1.js"></script>
+        <script type="text/javascript" src="js/dexie.js"></script>
+        <script type="text/javascript" src="js/jayRest.js"></script>
+        <title>Arojohnson Restaurant</title>
+    </head>
+    <body ng-app="jayApp" ng-controller="jayCtlr">
+        <div data-role="page" id="welcome">
+            <!-- header -->
+            <div data-role="header">
+                <h1>Jay Restaurant</h1>
+            </div>
+            <!-- content -->
+            <div data-role="content" class="ui-content">
+                <h2>Welcome !</h2>
+                <p class="mc-top-margin-1-5"><b>Existing Users</b></p>
+                <a href="#login" class="ui-btn ui-btn-b ui-corner-all">Sign In</a>
+                <p class="mc-top-margin-1-5"><b>Don't have an account?</b></p>
+                <a href="#sign-up" class="ui-btn ui-btn-b ui-corner-all">Sign Up</a>
+                <p></p>
+            </div>
+            <!-- Footer -->
+            <div data-role="footer">
+                <h4>&copy; <span ng-bind="siteName"></span></h4>
+            </div>
+        </div>
+        <!-- Start of Login page -->
+        <div data-role="page" id="login">
+            <!-- header -->
+            <div data-role="header">
+                <h1>Welcome to Jay Restaurant</h1>
+                <a href="#welcome" class="ui-btn ui-icon-carat-l ui-btn-icon-left ui-shadow ui-corner-all">Back</a>
+            </div>
+            <!-- content -->
+            <div data-role="content" class="ui-content">
+                <form name="login_form" ng-submit="validate();" >
+                    <h3>Sign In</h3>
+                    <label for="txt-email">Email Address</label>
+                    <input data-msg="Invalid E-Mail Address" required="required" type="email" name="txt-email" id="txt-email" ng-model="user.email" ng-pattern = '/^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i'>
+                    <a style="display:none;" id="alertPopup" href="#popupBasic"
+                       data-inline="true"
+                       data-rel="popup" data-position-to="origin" class="ui-btn ui-corner-all ui-shadow ui-btn-inline" data-transition="slidedown">Alert Popup</a>
+
+
+                    <label for="txt-password">Password</label>
+                    <input data-msg="Password Cannot be blank!" required="required" type="password" name="txt-password" id="txt-password" ng-model="user.password">
+                    <button type="submit" name="submit" value="submit" class="ui-btn-hidden" aria-disabled="false">Submit</button>
+                    <p></p>
+                </form>
+            </div>
+            <!-- Footer -->
+            <div data-role="footer">
+                <h4>&copy; <span ng-bind="siteName"></span></h4>
+            </div>
+        </div>
+        <!-- End of the Login page -->
+        <div data-role="page" id="sign-up">
+            <!-- header -->
+            <div data-role="header">
+                <h1>Jay Restaurant</h1>
+                <a href="#welcome" class="ui-btn ui-icon-carat-l ui-btn-icon-left ui-shadow ui-corner-all">Back</a>
+            </div>
+            <!-- content -->
+            <div data-role="content" class="ui-content">
+                <h2>Sign Up here !</h2>
+                <form ng-submit="signUp();" id="userForm" >
+                    <label for="first_name">First Name</label>
+                    <input data-msg="Please Enter your First Name" type="text" name="first_name" id="first_name"  ng-model="register.first_name" required>
+
+                    <label for="last_name">Last Name</label>
+                    <input data-msg="Please Enter your Last Name" type="text" name="last_name" id="last_name"  ng-model="register.last_name" required>
+
+                    <label for="register_age">Age:</label>
+                    <input type="range" name="register_age" id="register_age" ng-model="register.age" value="10" min="0" max="100">
+
+                    <label for="email"> E-mail:</label>
+                    <input data-msg="Invalid E-Mail Address" type="email" name="register_email" id="register_email"  ng-model="register.email"  required>
+
+                    <label for="password">Password:</label>
+                    <input data-msg="Please Enter your Password" type="password" name="password" ng-model="register.password" id="password" autocomplete="off" required>
+                    <button type="submit" class="ui-shadow ui-btn ui-corner-all">Save</button>
+                    <p></p>
+                </form>
+            </div>
+            <!-- Footer -->
+            <div data-role="footer">
+                <h4>&copy; <span ng-bind="siteName"></span></h4>
+            </div>
+        </div>
+
+        <!-- Start of Index page -->
+        <div data-role="page" id="index">
+            <!-- header -->
+            <div data-role="header">
+                <h1>Jay Restaurant</h1>
+                <a href="#jqm-navmenu-link" class="jqm-navmenu-link ui-nodisc-icon ui-alt-icon ui-btn-left ui-btn ui-icon-bars ui-btn-icon-notext ui-corner-all" data-role="button" role="button">Menu</a>
+            </div>
+            <!-- content -->
+            <div data-role="content">	
+                <div id="author-list" ng-show='!isSingleMenu();'>
+                    <ul  data-role="listview" data-filter="true" data-filter-placeholder="Search Menu..." data-inset="true"  data-autodividers="true">
+                        <li ng-repeat='(k,menu) in menuList'>
+                            <a href="#" ng-bind='menu.name' ng-click='showMenu(menu, k);'></a>
+                        </li>
+                    </ul>
+                </div>
+                <div class='menu-list' ng-show='isSingleMenu();'>
+                    <h2 ng-bind='singleMenu.name'></h2>
+                    <ul data-role="listview">
+                        <li>Price: <strong>$<span ng-bind="singleMenu.price"></span></strong></li>
+                        <li>
+                            <label for="qty">Quantity</label>
+                            <input type="range" name="qty" id="qty_dt" value="2" min="1" max="100">
+                            <button ng-click='saveSingleMenu(singleMenu.id);' class="ui-btn ui-icon-plus ui-btn-icon-left ui-shadow ui-corner-all">Add to Cart</button>
+                        </li>
+                    </ul>
+                    <p>&nbsp;</p>
+                    <a href="#" ng-click='clearSingleMenu();' class="ui-btn ui-icon-carat-l ui-btn-icon-left ui-shadow ui-corner-all">Back</a>
+                    <p>&nbsp;</p>
+                </div>
+            </div>
+            <!-- Footer -->
+            <div data-role="footer">
+                <h4>&copy; Arockia Johnson</h4>
+            </div>
+            <div data-role="panel" id="jqm-navmenu-link" data-display="overlay">
+                <ul data-role="listview"> 
+                    <li data-icon="home" class="active">
+                        <a href="#index">
+                            Menu List
+                        </a>
+                    </li>
+                    <li data-icon="carat-r">
+                        <a href="#cart" ng-click="getAllCart();">
+                            My Cart
+                        </a>
+                    </li>
+                    <li data-icon="carat-r">
+                        <a href="#" ng-click="logout();">
+                            Logout ( <span ng-bind="session.first_name"></span> )
+                        </a>
+                    </li>
+                    <li data-icon="recycle">
+                        <a href="#index" data-rel="close" class="ui-btn ui-btn-inline">Close Panel</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <!-- End of Index page -->
+        <div data-role="page" id="cart">
+            <!-- header -->
+            <div data-role="header">
+                <h1>Jay Restaurant - View Carts</h1>
+                <a href="#cart-page-panel" class="jqm-navmenu-link ui-nodisc-icon ui-alt-icon ui-btn-left ui-btn ui-icon-bars ui-btn-icon-notext ui-corner-all" data-role="button" role="button">Menu</a>
+            </div>
+            <!-- content -->
+            <div data-role="content">	
+                <div  >
+                    <ul id='cartListView'>
+
+                    </ul>
+                </div>
+            </div>
+            <!-- Footer -->
+            <div data-role="footer">
+                <h4>&copy; Arockia Johnson</h4>
+            </div>
+            <div data-role="panel" id="cart-page-panel" data-display="overlay">
+                <ul data-role="listview"> 
+                    <li data-icon="home" class="active">
+                        <a href="#index">
+                            Menu List
+                        </a>
+                    </li>
+                    <li data-icon="carat-r">
+                        <a href="#cart" ng-click="getAllCart();">
+                            My Cart
+                        </a>
+                    </li>
+                    <li data-icon="carat-r">
+                        <a href="#" ng-click="logout();">
+                            Logout ( <span ng-bind="session.first_name"></span> )
+                        </a>
+                    </li>
+                    <li data-icon="recycle">
+                        <a href="#index" data-rel="close" class="ui-btn ui-btn-inline">Close Panel</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div style='text-align: center;' data-role="popup" id="popupBasic" class="ui-content" data-theme="a">
+            <p ng-bind="alertMsg"></p>
+        </div>
+    </body>	
+</html>
+
+
