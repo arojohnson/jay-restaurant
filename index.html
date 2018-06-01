@@ -52,7 +52,9 @@
                        data-inline="true"
                        data-rel="popup" data-position-to="origin" class="ui-btn ui-corner-all ui-shadow ui-btn-inline" data-transition="slidedown">Alert Popup</a>
 
-
+                    <div style='text-align: center;' data-role="popup" id="popupBasic" class="ui-content" data-theme="a">
+                        <p ng-bind="alertMsg"></p>
+                    </div>
                     <label for="txt-password">Password</label>
                     <input data-msg="Password Cannot be blank!" required="required" type="password" name="txt-password" id="txt-password" ng-model="user.password">
                     <button type="submit" name="submit" value="submit" class="ui-btn-hidden" aria-disabled="false">Submit</button>
@@ -171,6 +173,27 @@
 
                     </ul>
                 </div>
+                <p>&nbsp;</p>
+                <table data-role="table"  class="ui-responsive ui-shadow" id='cartTable'>
+                    <thead>
+                        <tr>
+                            <th>Item Name</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Total</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="cartBody">
+
+                    </tbody>
+                </table>
+                <p>&nbsp;</p>
+                <div>
+                    <ul data-role="listview" id='grantTot'>
+                        <li>Grant Total <span class="ui-li-count total">0</span></li>
+                    </ul>
+                </div>
             </div>
             <!-- Footer -->
             <div data-role="footer">
@@ -198,9 +221,6 @@
                     </li>
                 </ul>
             </div>
-        </div>
-        <div style='text-align: center;' data-role="popup" id="popupBasic" class="ui-content" data-theme="a">
-            <p ng-bind="alertMsg"></p>
         </div>
     </body>	
 </html>
